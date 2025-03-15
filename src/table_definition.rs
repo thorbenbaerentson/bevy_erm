@@ -24,6 +24,7 @@ pub struct TableDefinition {
 }
 
 impl TableDefinition {
+    /// Create a new table definition with the given rust and sql name.
     pub fn new(rst_name: &str, sql_name: &str) -> TableDefinition {
         TableDefinition {
             rust_name: rst_name.to_owned(),
@@ -44,5 +45,15 @@ impl TableDefinition {
         }
 
         self.fields.insert(column.sql_name.clone(), column);
+    }
+
+    /// Return the number of fields.
+    pub fn no_fields(&self) -> usize {
+        self.fields.len()
+    }
+
+    /// Return the column defintion with the given name.
+    pub fn get(&self, column: &str) -> Option<&ColumnDefinition> {
+        self.fields.get(column)
     }
 }

@@ -14,9 +14,10 @@ pub mod prelude {
     pub use crate::attributes::ColumnName;
     pub use crate::attributes::Key;
     pub use crate::attributes::MaxLength;
-    pub use crate::attributes::NotNull;
     pub use crate::attributes::Reference;
-    pub use crate::column_definition::ColumnDefinition;
+    pub use crate::attributes::Unique;
 
+    pub use crate::column_definition::ColumnDefinition;
     pub use crate::column_definition::FieldConstraint;
+    pub use crate::column_definition::SqlType;
 }

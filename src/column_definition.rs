@@ -1,33 +1,35 @@
 use bevy::{log::info, reflect::Reflect};
 use std::any::TypeId;
 
-#[derive(Reflect, Debug, Clone)]
+#[derive(Reflect, Debug, Clone, PartialEq, PartialOrd)]
 pub enum FieldConstraint {
     Key,
     MaxLength(usize),
-    NotNull,
+    Unique,
     Reference(String, String), // Names the table and the column to use as relation
 }
 
-#[derive(Reflect, Debug, Default, Clone)]
+#[derive(Reflect, Debug, Default, Clone, PartialEq, PartialOrd)]
 pub enum SqlType {
-    /// The value provides the number of bits.
-    Integer(usize),
-    /// Value can be 32 or 64.
-    Float(usize),
-
     #[default]
-    Text,
+    None, // Dummy to satisfy the default trait.
 
-    Date,
-    Time,
-    DateTime,
+    /// The value provides the number of bits.
+    Integer(usize, bool), // Not null?
+    /// Value can be 32 or 64.
+    Float(usize, bool), // Not null?
 
-    Blob,
-    Boolean,
+    Text(bool), // Not null?
 
-    One2One(TypeId),
-    Many2Many(TypeId, bool),    // The bool marks, whether this relation is eager or 'lazy'.
+    Date(bool),     // Not null?
+    Time(bool),     // Not null?
+    DateTime(bool), // Not null?
+
+    Blob(bool),    // Not null?
+    Boolean(bool), // Not null?
+
+    One2One(TypeId, bool), // The bool marks, whether this relation is eager or 'lazy'. True means eager...
+    Many2Many(TypeId, bool), // The bool marks, whether this relation is eager or 'lazy'. True means eager...
 }
 
 #[derive(Debug, Default)]
@@ -47,7 +49,7 @@ impl ColumnDefinition {
             sql_name: sql_name.to_owned(),
             constraints: Vec::new(),
 
-            sql_type: SqlType::Blob,
+            sql_type: SqlType::Blob(true),
         }
     }
 
@@ -76,20 +78,8 @@ impl ColumnDefinition {
                 }
             }
 
-            FieldConstraint::NotNull => {
-                if self.is_not_null() {
-                    if let Some(x) = self
-                        .constraints
-                        .iter()
-                        .position(|e| matches!(e, FieldConstraint::NotNull))
-                    {
-                        self.constraints.remove(x);
-                    };
-                }
-            }
-
             FieldConstraint::Reference(_, _) => {
-                if self.is_not_null() {
+                if self.is_reference() {
                     if let Some(x) = self
                         .constraints
                         .iter()
@@ -97,6 +87,12 @@ impl ColumnDefinition {
                     {
                         self.constraints.remove(x);
                     };
+                }
+            }
+
+            FieldConstraint::Unique => {
+                if self.is_unique() {
+                    return;
                 }
             }
         }
@@ -115,11 +111,19 @@ impl ColumnDefinition {
 
     /// Returns true, if this column requires a value.
     pub fn is_not_null(&self) -> bool {
-        self.constraints
-            .iter()
-            .filter(|e| matches!(e, FieldConstraint::NotNull))
-            .count()
-            > 0
+        match self.sql_type {
+            SqlType::None => false,
+            SqlType::Integer(_, b) => b,
+            SqlType::Float(_, b) => b,
+            SqlType::Text(b) => b,
+            SqlType::Date(b) => b,
+            SqlType::Time(b) => b,
+            SqlType::DateTime(b) => b,
+            SqlType::Blob(b) => b,
+            SqlType::Boolean(b) => b,
+            SqlType::One2One(_, _) => false,
+            SqlType::Many2Many(_, _) => false,
+        }
     }
 
     /// Returns true, if this column has a relation to another table.
@@ -136,6 +140,15 @@ impl ColumnDefinition {
         self.constraints
             .iter()
             .filter(|e| matches!(e, FieldConstraint::MaxLength(_)))
+            .count()
+            > 0
+    }
+
+    /// Returns true, if this column has been marked as unique.
+    pub fn is_unique(&self) -> bool {
+        self.constraints
+            .iter()
+            .filter(|e| matches!(e, FieldConstraint::Unique))
             .count()
             > 0
     }
@@ -175,9 +188,7 @@ impl ColumnDefinition {
             .filter(|e| matches!(e, FieldConstraint::Reference(_, _)))
             .collect();
 
-        let Some(result) = col.get(0) else {
-            return None;
-        };
+        let result = col.first()?;
 
         Some((**result).clone())
     }
