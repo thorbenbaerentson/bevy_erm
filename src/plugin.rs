@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::prelude::ErmTypesRegistry;
+use bevy::prelude::*;
 
 /// The plugin needs to be added to the app.
 pub struct BevyERMPlugin;

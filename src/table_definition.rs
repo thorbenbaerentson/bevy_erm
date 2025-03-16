@@ -58,12 +58,14 @@ impl TableDefinition {
             return Some(table);
         }
 
-        if let Some(r) = self.fields
-                    .iter()
-                    .map(|y| y.1)
-                    .filter(|x| x.rust_name == column || x.sql_name == column)
-                    .collect::<Vec<&ColumnDefinition>>()
-                    .first() {
+        if let Some(r) = self
+            .fields
+            .iter()
+            .map(|y| y.1)
+            .filter(|x| x.rust_name == column || x.sql_name == column)
+            .collect::<Vec<&ColumnDefinition>>()
+            .first()
+        {
             return Some(*r);
         }
 
@@ -73,13 +75,17 @@ impl TableDefinition {
 
 impl Display for TableDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let columns = 
-            self.fields
-                .iter()
-                .map(|x| format!("\t{}", x.1))
-                .collect::<Vec<String>>()
-                .join("\n");
+        let columns = self
+            .fields
+            .iter()
+            .map(|x| format!("\t{}", x.1))
+            .collect::<Vec<String>>()
+            .join("\n");
 
-        write!(f, "Table: {} ({})\n{}", self.rust_name, self.sql_name, columns)
+        write!(
+            f,
+            "Table: {} ({})\n{}",
+            self.rust_name, self.sql_name, columns
+        )
     }
 }

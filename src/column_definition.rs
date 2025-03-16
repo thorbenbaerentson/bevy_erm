@@ -1,6 +1,6 @@
+use crate::prelude::{FieldConstraint, SqlType};
 use bevy::log::info;
 use std::fmt::Display;
-use crate::prelude::{FieldConstraint, SqlType};
 
 #[derive(Debug, Default)]
 pub struct ColumnDefinition {
@@ -144,7 +144,7 @@ impl ColumnDefinition {
         *result
     }
 
-    /// Get the reference constraint if one exists.
+    /// Get the reference constraint if one exists.qlType::Many2Many(_, _) => false,
     pub fn get_refence(&self) -> Option<FieldConstraint> {
         // Check, when debugging but not in release.
         #[cfg(debug_assertions)]
@@ -166,14 +166,17 @@ impl ColumnDefinition {
 
 impl Display for ColumnDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let constraints = self
+            .constraints
+            .iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<String>>()
+            .join(" - ");
 
-        let constraints = 
-            self.constraints
-                .iter()
-                .map(|x| x.to_string())
-                .collect::<Vec<String>>()
-                .join(" - ");
-
-        write!(f, "{} ({}) - {} {}", self.rust_name, self.sql_name, self.sql_type, constraints)
+        write!(
+            f,
+            "{} ({}) - {} {}",
+            self.rust_name, self.sql_name, self.sql_type, constraints
+        )
     }
 }

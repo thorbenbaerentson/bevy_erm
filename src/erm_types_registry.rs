@@ -63,8 +63,6 @@ impl ErmTypesRegistry {
                 return None;
             };
 
-            // info!("Relation name {}", name);
-
             return self.get_table_definition(name);
         }
 
@@ -203,7 +201,9 @@ impl ErmTypesRegistry {
                     match option_type {
                         SqlType::None => panic!("Invalid sql type!"),
                         SqlType::One2One(t, _) => return SqlType::Many2Many(t, true),
-                        SqlType::Many2Many(_, _) => panic!("Dont know how to handle nested relations!"),
+                        SqlType::Many2Many(_, _) => {
+                            panic!("Dont know how to handle nested relations!")
+                        }
                         SqlType::Integer(s, _) => return SqlType::Integer(s, false),
                         SqlType::Float(s, _) => return SqlType::Float(s, false),
                         SqlType::Text(_) => return SqlType::Text(false),
