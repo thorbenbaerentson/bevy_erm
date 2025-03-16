@@ -31,7 +31,7 @@ mod tests {
     use crate::prelude::*;
 
     #[derive(Reflect)]
-    #[reflect(@ColumnName::new("Players"))]
+    #[reflect(@TableName::new("Players"))]
     struct Player {
         #[reflect(@Key)]
         pub id : i64,
@@ -60,7 +60,7 @@ mod tests {
         app
     }
 
-    fn test_basic(
+    fn basic_setup(
         mut bevy_types_registry : ResMut<AppTypeRegistry>,
         mut erm_types_registry : ResMut<ErmTypesRegistry>,
     ) {
@@ -70,7 +70,7 @@ mod tests {
 
         // It should be possible to retrieve tables via sql or rust name.
         assert!(erm_types_registry.get_table_definition("Player").is_some());
-        // assert!(erm_types_registry.get_table_definition("Players").is_some());
+        assert!(erm_types_registry.get_table_definition("Players").is_some());
 
         let table_def = erm_types_registry.get_table_definition("Player").unwrap();
 
@@ -102,9 +102,10 @@ mod tests {
     }
 
     #[test]
-    fn test_basic_table_mapping() {
+    fn basic_table_mapping() {
         let mut app = prepare_app();
-        app.add_systems(Startup, test_basic);
+        app.add_systems(Startup, basic_setup);
         app.update();
+
     }
 }

@@ -54,7 +54,20 @@ impl TableDefinition {
 
     /// Return the column defintion with the given name.
     pub fn get(&self, column: &str) -> Option<&ColumnDefinition> {
-        self.fields.get(column)
+        if let Some(table) = self.fields.get(column) {
+            return Some(table);
+        }
+
+        if let Some(r) = self.fields
+                    .iter()
+                    .map(|y| y.1)
+                    .filter(|x| x.rust_name == column || x.sql_name == column)
+                    .collect::<Vec<&ColumnDefinition>>()
+                    .first() {
+            return Some(*r);
+        }
+
+        None
     }
 }
 
