@@ -1,36 +1,6 @@
-use bevy::{log::info, reflect::Reflect};
-use std::any::TypeId;
-
-#[derive(Reflect, Debug, Clone, PartialEq, PartialOrd)]
-pub enum FieldConstraint {
-    Key,
-    MaxLength(usize),
-    Unique,
-    Reference(String, String), // Names the table and the column to use as relation
-}
-
-#[derive(Reflect, Debug, Default, Clone, PartialEq, PartialOrd)]
-pub enum SqlType {
-    #[default]
-    None, // Dummy to satisfy the default trait.
-
-    /// The value provides the number of bits.
-    Integer(usize, bool), // Not null?
-    /// Value can be 32 or 64.
-    Float(usize, bool), // Not null?
-
-    Text(bool), // Not null?
-
-    Date(bool),     // Not null?
-    Time(bool),     // Not null?
-    DateTime(bool), // Not null?
-
-    Blob(bool),    // Not null?
-    Boolean(bool), // Not null?
-
-    One2One(TypeId, bool), // The bool marks, whether this relation is eager or 'lazy'. True means eager...
-    Many2Many(TypeId, bool), // The bool marks, whether this relation is eager or 'lazy'. True means eager...
-}
+use bevy::log::info;
+use std::fmt::Display;
+use crate::prelude::{FieldConstraint, SqlType};
 
 #[derive(Debug, Default)]
 pub struct ColumnDefinition {
@@ -191,5 +161,19 @@ impl ColumnDefinition {
         let result = col.first()?;
 
         Some((**result).clone())
+    }
+}
+
+impl Display for ColumnDefinition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
+        let constraints = 
+            self.constraints
+                .iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<String>>()
+                .join(" - ");
+
+        write!(f, "{} ({}) - {} {}", self.rust_name, self.sql_name, self.sql_type, constraints)
     }
 }

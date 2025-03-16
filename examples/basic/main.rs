@@ -5,7 +5,7 @@ use bevy_erm::prelude::*;
 
 // Retrieve all meta data about table using ErmTypeRegistry and AppTypeRegisrty.
 // Both registries must be mutable.
-pub fn startup(mut registry: ResMut<ErmTypeRegistry>, mut type_registry: ResMut<AppTypeRegistry>) {
+pub fn startup(mut registry: ResMut<ErmTypesRegistry>, mut type_registry: ResMut<AppTypeRegistry>) {
     // Retrieve the sql name from the registry using AppTypeRegistry and the type in question.
     let sql_name = registry.register_type::<Player>(type_registry.as_mut());
     assert!(sql_name.is_some());

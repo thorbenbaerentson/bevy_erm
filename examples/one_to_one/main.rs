@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy::reflect::Reflect;
 use bevy_erm::prelude::*;
 
-pub fn startup(mut registry: ResMut<ErmTypeRegistry>, mut type_registry: ResMut<AppTypeRegistry>) {
+pub fn startup(mut registry: ResMut<ErmTypesRegistry>, mut type_registry: ResMut<AppTypeRegistry>) {
     let sql_name = registry.register_type::<Zombie>(type_registry.as_mut());
     let sql_name_2 = registry.register_type::<Player>(type_registry.as_mut());
     assert!(sql_name.is_some());
@@ -15,6 +15,8 @@ pub fn startup(mut registry: ResMut<ErmTypeRegistry>, mut type_registry: ResMut<
     let table = table.unwrap();
     let rust_name = table.rust_name.clone();
     let sql_name = table.sql_name.clone();
+
+    info!("{}", table);
 
     assert_eq!(sql_name, "Zombies");
     assert_eq!(rust_name, "Zombie");

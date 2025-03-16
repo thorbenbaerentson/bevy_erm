@@ -1,5 +1,5 @@
 use bevy::{log::info, reflect::Reflect};
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 use crate::prelude::ColumnDefinition;
 
@@ -55,5 +55,18 @@ impl TableDefinition {
     /// Return the column defintion with the given name.
     pub fn get(&self, column: &str) -> Option<&ColumnDefinition> {
         self.fields.get(column)
+    }
+}
+
+impl Display for TableDefinition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let columns = 
+            self.fields
+                .iter()
+                .map(|x| format!("\t{}", x.1))
+                .collect::<Vec<String>>()
+                .join("\n");
+
+        write!(f, "Table: {} ({})\n{}", self.rust_name, self.sql_name, columns)
     }
 }
