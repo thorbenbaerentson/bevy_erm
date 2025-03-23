@@ -2,6 +2,7 @@ mod attributes;
 mod column_definition;
 mod constraints;
 mod erm_types_registry;
+mod from_blob;
 mod plugin;
 mod sql_types;
 mod table_definition;
@@ -23,6 +24,8 @@ pub mod prelude {
     pub use crate::column_definition::ColumnDefinition;
     pub use crate::constraints::FieldConstraint;
     pub use crate::sql_types::SqlType;
+
+    pub use crate::from_blob::*;
 }
 
 #[cfg(test)]
@@ -30,8 +33,8 @@ mod tests {
     use crate::prelude::*;
     use bevy::prelude::*;
 
-    #[derive(Reflect)]
-    #[reflect(@TableName::new("Players"))]
+    #[derive(Reflect, Default)]
+    #[reflect(Default, @TableName::new("Players"))]
     struct Player {
         #[reflect(@Key)]
         pub id: i64,
@@ -40,8 +43,8 @@ mod tests {
         pub comments: Option<String>,
     }
 
-    #[derive(Reflect)]
-    #[reflect(@TableName::new("Zombies"))]
+    #[derive(Reflect, Default)]
+    #[reflect(Default, @TableName::new("Zombies"))]
     struct Zombie {
         #[reflect(@Key)]
         pub id: i64,
@@ -49,8 +52,8 @@ mod tests {
         pub target: Option<Player>,
     }
 
-    #[derive(Reflect)]
-    #[reflect(@TableName::new("GameModes"))]
+    #[derive(Reflect, Default)]
+    #[reflect(Default, @TableName::new("GameModes"))]
     struct GameMode {
         #[reflect(@Key)]
         pub id: i64,
@@ -58,8 +61,8 @@ mod tests {
         pub spawn_points: Vec<SpawnPoint>,
     }
 
-    #[derive(Reflect)]
-    #[reflect(@TableName::new("SpawnPoints"))]
+    #[derive(Reflect, Default)]
+    #[reflect(Default, @TableName::new("SpawnPoints"))]
     struct SpawnPoint {
         #[reflect(@Key)]
         pub id: i64,

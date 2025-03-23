@@ -47,8 +47,8 @@ pub fn startup(mut registry: ResMut<ErmTypesRegistry>, mut type_registry: ResMut
     info!("{}", game_mode_table);
 }
 
-#[derive(Reflect)]
-#[reflect(@TableName::new("GameModes"))]
+#[derive(Reflect, Default)]
+#[reflect(Default, @TableName::new("GameModes"))]
 pub struct GameMode {
     #[reflect(@Key, @ColumnName::new("id"))]
     pub key: i32,
@@ -58,8 +58,8 @@ pub struct GameMode {
     pub spawn_points: Vec<SpawnPoint>,
 }
 
-#[derive(Reflect)]
-#[reflect(@TableName::new("SpawnPoints"))]
+#[derive(Reflect, Default)]
+#[reflect(Default, @TableName::new("SpawnPoints"))]
 pub struct SpawnPoint {
     #[reflect(@Key, @ColumnName::new("id"))]
     pub key: i32,

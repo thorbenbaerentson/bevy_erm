@@ -73,19 +73,19 @@ impl ErmTypesRegistry {
     fn rust_to_sql_type(ty: &TypeInfo, app_registry: &AppTypeRegistry) -> SqlType {
         // Integers.
         if *ty.ty() == Type::of::<u8>() {
-            return SqlType::Integer(8, true);
+            return SqlType::UnsingedInteger(8, true);
         }
         if *ty.ty() == Type::of::<u16>() {
-            return SqlType::Integer(16, true);
+            return SqlType::UnsingedInteger(16, true);
         }
         if *ty.ty() == Type::of::<u32>() {
-            return SqlType::Integer(32, true);
+            return SqlType::UnsingedInteger(32, true);
         }
         if *ty.ty() == Type::of::<u64>() {
-            return SqlType::Integer(64, true);
+            return SqlType::UnsingedInteger(64, true);
         }
         if *ty.ty() == Type::of::<u128>() {
-            return SqlType::Integer(128, true);
+            return SqlType::UnsingedInteger(128, true);
         }
 
         if *ty.ty() == Type::of::<i8>() {
@@ -178,6 +178,9 @@ impl ErmTypesRegistry {
                         SqlType::One2One(t, _) => return SqlType::One2One(t, false),
                         SqlType::Many2Many(t, _) => return SqlType::Many2Many(t, false),
                         SqlType::Integer(s, _) => return SqlType::Integer(s, false),
+                        SqlType::UnsingedInteger(s, _) => {
+                            return SqlType::UnsingedInteger(s, false)
+                        }
                         SqlType::Float(s, _) => return SqlType::Float(s, false),
                         SqlType::Text(_) => return SqlType::Text(false),
                         SqlType::Date(_) => return SqlType::Date(false),
@@ -205,6 +208,9 @@ impl ErmTypesRegistry {
                             panic!("Dont know how to handle nested relations!")
                         }
                         SqlType::Integer(s, _) => return SqlType::Integer(s, false),
+                        SqlType::UnsingedInteger(s, _) => {
+                            return SqlType::UnsingedInteger(s, false)
+                        }
                         SqlType::Float(s, _) => return SqlType::Float(s, false),
                         SqlType::Text(_) => return SqlType::Text(false),
                         SqlType::Date(_) => return SqlType::Date(false),
@@ -241,13 +247,15 @@ impl ErmTypesRegistry {
             return None;
         };
 
-        let mut def = ColumnDefinition::default();
-
         // Rust name
         let name = f.name().to_owned();
+        let mut def = ColumnDefinition {
+            rust_name: name.to_owned(),
+            sql_name: name.to_owned(),
+            ty: *f.ty(),
 
-        def.rust_name = name.to_owned();
-        def.sql_name = name.to_owned();
+            ..ColumnDefinition::default()
+        };
 
         // Constraints
         if f.get_attribute::<Key>().is_some() {
@@ -281,7 +289,11 @@ impl ErmTypesRegistry {
 
     /// Reflect over the type T and add a new table definition.
     /// Adds the table definition to the ERM-Registry and returns the sql name.
-    pub fn register_type<T: Reflect>(&mut self, app_registry: &AppTypeRegistry) -> Option<String> {
+    /// Remember to use the reflect marco and reflect over Default, like so: #[reflect(Default)]
+    pub fn register_type<T>(&mut self, app_registry: &AppTypeRegistry) -> Option<String>
+    where
+        T: Reflect + Default,
+    {
         let type_id = TypeId::of::<T>();
         let registry = app_registry.read();
 
@@ -294,11 +306,18 @@ impl ErmTypesRegistry {
             return None;
         };
 
+        let Some(ref_default) = t.data::<ReflectDefault>() else {
+            panic!(
+                "Type {} has no reflect default",
+                strct.ty().ident().unwrap()
+            );
+        };
+
         // Rust name
         let rust_name = strct.ty().ident()?;
 
         // Check for TableName attribute.
-        let mut r = TableDefinition::new(rust_name, rust_name);
+        let mut r = TableDefinition::new(rust_name, rust_name, strct.ty(), ref_default);
         let mut sql_name = rust_name.to_string();
         if let Some(table_name) = strct.get_attribute::<TableName>() {
             sql_name = table_name.sql_name.clone();

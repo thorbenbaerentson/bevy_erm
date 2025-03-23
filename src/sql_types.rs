@@ -8,6 +8,7 @@ pub enum SqlType {
 
     /// The value provides the number of bits.
     Integer(usize, bool), // Not null?
+    UnsingedInteger(usize, bool), // Not null?
     /// Value can be 32 or 64.
     Float(usize, bool), // Not null?
 
@@ -31,6 +32,12 @@ impl Display for SqlType {
             SqlType::Integer(bits, not_null) => write!(
                 f,
                 "i-{} ({})",
+                bits,
+                if *not_null { "not null" } else { "nullable" }
+            ),
+            SqlType::UnsingedInteger(bits, not_null) => write!(
+                f,
+                "u-{} ({})",
                 bits,
                 if *not_null { "not null" } else { "nullable" }
             ),

@@ -1,4 +1,7 @@
-use bevy::{log::info, reflect::Reflect};
+use bevy::{
+    log::info,
+    reflect::{prelude::ReflectDefault, Reflect, Type},
+};
 use std::{collections::HashMap, fmt::Display};
 
 use crate::prelude::ColumnDefinition;
@@ -21,16 +24,27 @@ pub struct TableDefinition {
     pub sql_name: String,
 
     pub fields: HashMap<String, ColumnDefinition>,
+
+    pub ty: Type,
+    pub reflect_default: ReflectDefault,
 }
 
 impl TableDefinition {
     /// Create a new table definition with the given rust and sql name.
-    pub fn new(rst_name: &str, sql_name: &str) -> TableDefinition {
+    pub fn new(
+        rst_name: &str,
+        sql_name: &str,
+        ty: &Type,
+        ref_default: &ReflectDefault,
+    ) -> TableDefinition {
         TableDefinition {
             rust_name: rst_name.to_owned(),
             sql_name: sql_name.to_owned(),
 
             fields: HashMap::new(),
+
+            ty: *ty,
+            reflect_default: ref_default.to_owned(),
         }
     }
 

@@ -52,8 +52,8 @@ pub fn startup(mut registry: ResMut<ErmTypesRegistry>, mut type_registry: ResMut
     }
 }
 
-#[derive(Reflect)]
-#[reflect(@TableName::new("Players"))]
+#[derive(Reflect, Default)]
+#[reflect(Default, @TableName::new("Players"))]
 pub struct Player {
     #[reflect(@Key, @ColumnName::new("id"))]
     pub key: i32,

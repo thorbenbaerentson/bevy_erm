@@ -1,8 +1,8 @@
 use crate::prelude::{FieldConstraint, SqlType};
-use bevy::log::info;
+use bevy::{log::info, reflect::Type};
 use std::fmt::Display;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct ColumnDefinition {
     pub rust_name: String,
     pub sql_name: String,
@@ -10,6 +10,8 @@ pub struct ColumnDefinition {
     pub sql_type: SqlType,
 
     pub constraints: Vec<FieldConstraint>,
+
+    pub ty: Type,
 }
 
 impl ColumnDefinition {
@@ -20,6 +22,8 @@ impl ColumnDefinition {
             constraints: Vec::new(),
 
             sql_type: SqlType::Blob(true),
+
+            ty: Type::of::<i32>(),
         }
     }
 
@@ -84,6 +88,7 @@ impl ColumnDefinition {
         match self.sql_type {
             SqlType::None => false,
             SqlType::Integer(_, b) => b,
+            SqlType::UnsingedInteger(_, b) => b,
             SqlType::Float(_, b) => b,
             SqlType::Text(b) => b,
             SqlType::Date(b) => b,
@@ -178,5 +183,11 @@ impl Display for ColumnDefinition {
             "{} ({}) - {} {}",
             self.rust_name, self.sql_name, self.sql_type, constraints
         )
+    }
+}
+
+impl Default for ColumnDefinition {
+    fn default() -> Self {
+        Self::new(&String::default(), &String::default())
     }
 }
