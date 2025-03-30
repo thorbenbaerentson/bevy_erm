@@ -100,7 +100,6 @@ mod tests {
     }
 
     fn basic(
-        // mut bevy_types_registry : ResMut<AppTypeRegistry>,
         erm_types_registry: ResMut<ErmTypesRegistry>,
     ) {
         // It should be possible to retrieve tables via sql or rust name.
@@ -147,6 +146,7 @@ mod tests {
         let mut app = prepare_app();
         app.add_systems(Startup, startup);
         app.add_systems(PostStartup, basic);
+
         app.update();
     }
 
@@ -205,6 +205,7 @@ mod tests {
         let mut app = prepare_app();
         app.add_systems(Startup, startup);
         app.add_systems(PostStartup, basic_with_relation);
+        
         app.update();
     }
 
@@ -240,7 +241,10 @@ mod tests {
         assert!(!table_def.get("spawn_points").unwrap().is_not_null());
         assert!(table_def.get("spawn_points").unwrap().is_reference());
         assert!(!table_def.get("spawn_points").unwrap().is_unique());
-        assert!(!table_def.get("spawn_points").unwrap().has_max_length());
+        assert!(!table_def.get("spawn_points").unwrap().has_max_length());assert_eq!(
+            table_def.get("id").unwrap().sql_type,
+            SqlType::Integer(64, true)
+        );
 
         let target_column = table_def.get("spawn_points").unwrap();
         assert!(target_column.is_reference());
@@ -268,6 +272,7 @@ mod tests {
         let mut app = prepare_app();
         app.add_systems(Startup, startup);
         app.add_systems(PostStartup, many_to_many_relation);
+
         app.update();
     }
 }

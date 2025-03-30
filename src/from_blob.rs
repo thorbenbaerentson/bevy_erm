@@ -212,6 +212,75 @@ impl FromBlob for UVec4 {
     }
 }
 
+impl IntoBlob for Srgba {
+    fn into_blob(self) -> Vec<u8> {
+        [
+            f32::to_le_bytes(self.red),
+            f32::to_le_bytes(self.green),
+            f32::to_le_bytes(self.blue),
+            f32::to_le_bytes(self.alpha),
+        ]
+        .concat()
+    }
+}
+
+impl FromBlob for Srgba {
+    fn from_blob(value: &[u8]) -> Self {
+        let red = f32::from_le_bytes(value[0..4].try_into().expect("Not enough bites"));
+        let green = f32::from_le_bytes(value[4..8].try_into().expect("Not enough bites"));
+        let blue = f32::from_le_bytes(value[8..12].try_into().expect("Not enough bites"));
+        let alpha = f32::from_le_bytes(value[12..16].try_into().expect("Not enough bites"));
+
+        Srgba::new(red, green, blue, alpha)
+    }
+}
+
+impl IntoBlob for Rect {
+    fn into_blob(self) -> Vec<u8> {
+        [
+            f32::to_le_bytes(self.min.x),
+            f32::to_le_bytes(self.min.y),
+            f32::to_le_bytes(self.max.x),
+            f32::to_le_bytes(self.max.y),
+        ]
+        .concat()
+    }
+}
+
+impl FromBlob for Rect {
+    fn from_blob(value: &[u8]) -> Self {
+        let x1 = f32::from_le_bytes(value[0..4].try_into().expect("Not enough bites"));
+        let y1 = f32::from_le_bytes(value[4..8].try_into().expect("Not enough bites"));
+        let x2 = f32::from_le_bytes(value[8..12].try_into().expect("Not enough bites"));
+        let y2 = f32::from_le_bytes(value[12..16].try_into().expect("Not enough bites"));
+
+        Rect::new(x1, y1, x2, y2)
+    }
+}
+
+impl IntoBlob for IRect {
+    fn into_blob(self) -> Vec<u8> {
+        [
+            i32::to_le_bytes(self.min.x),
+            i32::to_le_bytes(self.min.y),
+            i32::to_le_bytes(self.max.x),
+            i32::to_le_bytes(self.max.y),
+        ]
+        .concat()
+    }
+}
+
+impl FromBlob for IRect {
+    fn from_blob(value: &[u8]) -> Self {
+        let x1 = i32::from_le_bytes(value[0..4].try_into().expect("Not enough bites"));
+        let y1 = i32::from_le_bytes(value[4..8].try_into().expect("Not enough bites"));
+        let x2 = i32::from_le_bytes(value[8..12].try_into().expect("Not enough bites"));
+        let y2 = i32::from_le_bytes(value[12..16].try_into().expect("Not enough bites"));
+
+        IRect::new(x1, y1, x2, y2)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{FromBlob, IntoBlob};
@@ -361,6 +430,57 @@ mod tests {
                         let subject = UVec4::new(x, y, z, w);
                         let blob = subject.into_blob();
                         let test = UVec4::from_blob(&blob);
+
+                        assert_eq!(subject, test);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_srgb() {
+        for x in 1..10 {
+            for y in 1..10 {
+                for z in 1..10 {
+                    for w in 1..10 {
+                        let subject = Srgba::from_vec4(Vec4::new(x as f32, y as f32, z as f32, w as f32));
+                        let blob = subject.into_blob();
+                        let test = Srgba::from_blob(&blob);
+
+                        assert_eq!(subject, test);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_rect() {
+        for x in 1..10 {
+            for y in 1..10 {
+                for z in 1..10 {
+                    for w in 1..10 {
+                        let subject = Rect::new(x as f32, y as f32, z as f32, w as f32);
+                        let blob = subject.into_blob();
+                        let test = Rect::from_blob(&blob);
+
+                        assert_eq!(subject, test);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_irect() {
+        for x in 1..10 {
+            for y in 1..10 {
+                for z in 1..10 {
+                    for w in 1..10 {
+                        let subject = IRect::new(x, y, z, w);
+                        let blob = subject.into_blob();
+                        let test = IRect::from_blob(&blob);
 
                         assert_eq!(subject, test);
                     }

@@ -1,25 +1,26 @@
 use bevy::reflect::Reflect;
 use std::{any::TypeId, fmt::Display};
 
+// The bool used for atomic values indicates, whether a value is not null.
 #[derive(Reflect, Debug, Default, Clone, PartialEq, PartialOrd)]
 pub enum SqlType {
     #[default]
     None, // Dummy to satisfy the default trait.
 
     /// The value provides the number of bits.
-    Integer(usize, bool), // Not null?
-    UnsingedInteger(usize, bool), // Not null?
+    Integer(usize, bool),
+    UnsingedInteger(usize, bool),
     /// Value can be 32 or 64.
-    Float(usize, bool), // Not null?
+    Float(usize, bool),
 
-    Text(bool), // Not null?
+    Text(bool),
 
-    Date(bool),     // Not null?
-    Time(bool),     // Not null?
-    DateTime(bool), // Not null?
+    Date(bool),
+    Time(bool),
+    DateTime(bool),
 
-    Blob(bool),    // Not null?
-    Boolean(bool), // Not null?
+    Blob(bool),
+    Boolean(bool),
 
     One2One(TypeId, bool), // The bool marks, whether this relation is eager or 'lazy'. True means eager...
     Many2Many(TypeId, bool), // The bool marks, whether this relation is eager or 'lazy'. True means eager...
