@@ -98,8 +98,8 @@ impl ColumnDefinition {
             SqlType::DateTime(b) => b,
             SqlType::Blob(b) => b,
             SqlType::Boolean(b) => b,
-            SqlType::One2One(_, _) => false,
-            SqlType::Many2Many(_, _) => false,
+            SqlType::One2One(_, b) => !b,
+            SqlType::Many2Many(_, b) => !b,
         }
     }
 

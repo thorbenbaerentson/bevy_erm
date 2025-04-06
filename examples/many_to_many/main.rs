@@ -7,13 +7,17 @@ pub fn startup(mut registry: ResMut<ErmTypesRegistry>, mut type_registry: ResMut
     let reg = type_registry.as_mut();
     let spawn_point_name = registry.register_type::<SpawnPoint>(reg);
     let game_mode_name = registry.register_type::<GameMode>(reg);
+    let game_mode_rewards_name = registry.register_type::<GameModeReward>(reg);
     assert!(spawn_point_name.is_some());
     assert!(game_mode_name.is_some());
+    assert!(game_mode_rewards_name.is_some());
 
     let spawn_point_table_option = registry.get_table_definition(&spawn_point_name.unwrap());
     let game_mode_table_option = registry.get_table_definition(&game_mode_name.unwrap());
+    let game_mode_rewards_table_option = registry.get_table_definition(&game_mode_rewards_name.unwrap());
     assert!(spawn_point_table_option.is_some());
     assert!(game_mode_table_option.is_some());
+    assert!(game_mode_rewards_table_option.is_some());
 
     // Spawn point checks.
     let spawn_point_table = spawn_point_table_option.unwrap();
@@ -40,11 +44,33 @@ pub fn startup(mut registry: ResMut<ErmTypesRegistry>, mut type_registry: ResMut
         panic!("Expected a column 'SpawnPoints' to be part of the table.")
     };
     assert!(spawn_points_column.is_reference());
-    let SqlType::Many2Many(_, _) = spawn_points_column.sql_type else {
+    let SqlType::Many2Many(_, eager) = spawn_points_column.sql_type else {
         panic!("Expected spawn points to be a many to many relation");
     };
-
+    assert!(eager);
     info!("{}", game_mode_table);
+
+    // Game mode reward
+    let game_mode_rewards_table = game_mode_rewards_table_option.unwrap();
+    rust_name = game_mode_rewards_table.rust_name.clone();
+    sql_name = game_mode_rewards_table.sql_name.clone();
+    assert_eq!(sql_name, "GameModeRewards");
+    assert_eq!(rust_name, "GameModeReward");
+
+    // Wrapping a vector in an option implicitly marks it as eager loading and
+    // nullable.
+    assert!(!eager);
+
+    info!("{}", game_mode_rewards_table);
+}
+
+#[derive(Reflect, Default)]
+#[reflect(Default, @TableName::new("GameModeRewards"))]
+pub struct GameModeReward {
+    #[reflect(@Key, @ColumnName::new("id"))]
+    pub key: i32,
+    #[reflect(@MaxLength::new(64))]
+    pub name: String,
 }
 
 #[derive(Reflect, Default)]
@@ -56,6 +82,8 @@ pub struct GameMode {
     pub name: String,
     #[reflect(@ColumnName::new("SpawnPoints"), @Reference::new("SpawnPoints", "id"))]
     pub spawn_points: Vec<SpawnPoint>,
+    #[reflect(@ColumnName::new("GameModeRewards"), @Reference::new("GameModeRewards", "id"))]
+    pub rewards: Option<Vec<GameModeReward>>,
 }
 
 #[derive(Reflect, Default)]
@@ -82,9 +110,12 @@ pub fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(BevyERMPlugin)
+        
         // Register your types. This ensures, that we can reflect over these types.
         .register_type::<SpawnPoint>()
         .register_type::<GameMode>()
+        .register_type::<GameModeReward>()
+
         .add_systems(Startup, startup)
         .add_systems(Update, update)
         .run();

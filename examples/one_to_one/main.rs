@@ -33,6 +33,7 @@ pub fn startup(mut registry: ResMut<ErmTypesRegistry>, mut type_registry: ResMut
         info!("Type: {} Column {}.", type_name, column_name);
         if let SqlType::One2One(t, b) = col.sql_type {
             // If the type is wrapped in an Option, it is implicitly marked for 'lazy' loading.
+            // It also means, that the resulting database column can contain null values.
             assert!(!b);
             let ty = registry.get_type_from_type_id(&type_registry, t);
             let Some(t) = ty else {

@@ -175,7 +175,7 @@ mod tests {
         );
 
         assert!(!table_def.get("target").unwrap().is_key());
-        assert!(!table_def.get("target").unwrap().is_not_null());
+        assert!(table_def.get("target").unwrap().is_not_null());
         assert!(table_def.get("target").unwrap().is_reference());
         assert!(!table_def.get("target").unwrap().is_unique());
         assert!(!table_def.get("target").unwrap().has_max_length());
