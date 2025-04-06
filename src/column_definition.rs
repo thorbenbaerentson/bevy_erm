@@ -8,6 +8,7 @@ pub struct ColumnDefinition {
     pub sql_name: String,
 
     pub sql_type: SqlType,
+    pub order : usize,
 
     pub constraints: Vec<FieldConstraint>,
 
@@ -15,13 +16,14 @@ pub struct ColumnDefinition {
 }
 
 impl ColumnDefinition {
-    pub fn new(name: &str, sql_name: &str) -> Self {
+    pub fn new(name: &str, sql_name: &str, order : usize) -> Self {
         ColumnDefinition {
             rust_name: name.to_owned(),
             sql_name: sql_name.to_owned(),
             constraints: Vec::new(),
 
             sql_type: SqlType::Blob(true),
+            order,
 
             ty: Type::of::<i32>(),
         }
@@ -188,6 +190,6 @@ impl Display for ColumnDefinition {
 
 impl Default for ColumnDefinition {
     fn default() -> Self {
-        Self::new(&String::default(), &String::default())
+        Self::new(&String::default(), &String::default(), 0)
     }
 }

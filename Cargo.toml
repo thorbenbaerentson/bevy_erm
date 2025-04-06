@@ -4,5 +4,5 @@ version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-# bevy = { version = "*", default-features = false, features = ["dynamic_linking"] }
-bevy = { version = "*", default-features = false, features = ["bevy_color"]}
+# bevy = { version = "*", default-features = false, features = ["bevy_color", "dynamic_linking"] }
+bevy = { version = "*", default-features = false, features = ["bevy_color"] }

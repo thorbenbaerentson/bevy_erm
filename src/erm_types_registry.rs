@@ -238,6 +238,7 @@ impl ErmTypesRegistry {
     fn field_definition(
         f: &NamedField,
         app_registry: &AppTypeRegistry,
+        order : usize,
     ) -> Option<ColumnDefinition> {
         let Some(type_info) = f.type_info() else {
             info!(
@@ -253,6 +254,7 @@ impl ErmTypesRegistry {
             rust_name: name.to_owned(),
             sql_name: name.to_owned(),
             ty: *f.ty(),
+            order,
 
             ..ColumnDefinition::default()
         };
@@ -291,8 +293,10 @@ impl ErmTypesRegistry {
     /// Adds the table definition to the ERM-Registry and returns the sql name.
     /// Remember to use the reflect marco and reflect over Default, like so: #[reflect(Default)]
     pub fn register_type<T>(&mut self, app_registry: &AppTypeRegistry) -> Option<String>
+    // We expect T to be a struct! Unnamed tuples cannot be mapped to a typical relational datamodel. 
+    // All SQL implementation i've encountered so far required a table to explicitly name its fields.
     where
-        T: Reflect + Default,
+        T: Reflect + Default + TypePath + bevy::prelude::Struct
     {
         let type_id = TypeId::of::<T>();
         let registry = app_registry.read();
@@ -335,7 +339,7 @@ impl ErmTypesRegistry {
                 continue;
             };
 
-            let Some(field) = Self::field_definition(f, app_registry) else {
+            let Some(field) = Self::field_definition(f, app_registry, i) else {
                 continue;
             };
 
