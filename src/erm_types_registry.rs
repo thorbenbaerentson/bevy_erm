@@ -25,8 +25,8 @@ impl ErmTypesRegistry {
     /// Retrieve table definition by rust or sql name.
     /// The sql name will be quicker, since the definitions are held in a
     /// hashmap using the sql_name as key. However, going through all tables
-    /// in a database should not be that expensive, since there usually arent thounsands
-    /// of them in a database.
+    /// in a database should not be that expensive, since there usually aren't thounsands
+    /// in a database.
     pub fn get_table_definition(&self, name: &str) -> Option<&TableDefinition> {
         if let Some(r) = self.tables.get(name) {
             return Some(r);
@@ -167,7 +167,8 @@ impl ErmTypesRegistry {
 
         // Check for option:
         if let TypeInfo::Enum(e) = ty {
-            if !e.generics().is_empty() && e.generics().len() == 1 {
+            
+            if !e.generics().is_empty() && e.generics().len() == 1  && e.variant("Some").is_some() {
                 let tmp = e.generics()[0].clone();
                 if let Some(type_info) = app_registry.read().get(tmp.type_id()) {
                     let option_type = Self::rust_to_sql_type(type_info.type_info(), app_registry);
@@ -228,8 +229,7 @@ impl ErmTypesRegistry {
         let type_name = ty.ty().ident().unwrap().to_string();
         if let Some(t) = app_registry.read().get_with_short_type_path(&type_name) {
             let type_id = t.type_id();
-            // info!("Type name: {} Type Id: {:?}", type_name, type_id);
-            return SqlType::One2One(type_id, false);
+            return SqlType::One2One(type_id, true);
         };
 
         SqlType::Blob(true)

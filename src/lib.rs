@@ -41,6 +41,7 @@ mod tests {
         #[reflect(@MaxLength::new(64))]
         pub name: String,
         pub comments: Option<String>,
+        pub spawn : SpawnPoint,     // No option == not null
     }
 
     #[derive(Reflect, Default)]
@@ -108,10 +109,11 @@ mod tests {
 
         let table_def = erm_types_registry.get_table_definition("Player").unwrap();
 
-        assert_eq!(table_def.no_fields(), 3);
+        assert_eq!(table_def.no_fields(), 4);
         assert!(table_def.get("id").is_some());
         assert!(table_def.get("name").is_some());
         assert!(table_def.get("comments").is_some());
+        assert!(table_def.get("spawn").is_some());
 
         assert!(table_def.get("id").unwrap().is_key());
         assert!(table_def.get("id").unwrap().is_not_null());
@@ -142,6 +144,9 @@ mod tests {
             table_def.get("comments").unwrap().sql_type,
             SqlType::Text(false)
         );
+
+        assert!(table_def.get("spawn").unwrap().is_eager());
+        assert!(table_def.get("spawn").unwrap().is_not_null());
     }
 
     #[test]
