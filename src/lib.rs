@@ -118,6 +118,7 @@ mod tests {
         assert!(!table_def.get("id").unwrap().is_reference());
         assert!(!table_def.get("id").unwrap().is_unique());
         assert!(!table_def.get("id").unwrap().has_max_length());
+        assert!(!table_def.get("id").unwrap().is_eager());
         assert_eq!(
             table_def.get("id").unwrap().sql_type,
             SqlType::Integer(64, true)
@@ -128,6 +129,7 @@ mod tests {
         assert!(!table_def.get("name").unwrap().is_reference());
         assert!(!table_def.get("name").unwrap().is_unique());
         assert!(table_def.get("name").unwrap().has_max_length());
+        assert!(!table_def.get("name").unwrap().is_eager());
         assert_eq!(table_def.get("name").unwrap().sql_type, SqlType::Text(true));
 
         assert!(!table_def.get("comments").unwrap().is_key());
@@ -135,6 +137,7 @@ mod tests {
         assert!(!table_def.get("comments").unwrap().is_reference());
         assert!(!table_def.get("comments").unwrap().is_unique());
         assert!(!table_def.get("comments").unwrap().has_max_length());
+        assert!(!table_def.get("comments").unwrap().is_eager());
         assert_eq!(
             table_def.get("comments").unwrap().sql_type,
             SqlType::Text(false)
@@ -169,13 +172,14 @@ mod tests {
         assert!(!table_def.get("id").unwrap().is_reference());
         assert!(!table_def.get("id").unwrap().is_unique());
         assert!(!table_def.get("id").unwrap().has_max_length());
+        assert!(!table_def.get("id").unwrap().is_eager());
         assert_eq!(
             table_def.get("id").unwrap().sql_type,
             SqlType::Integer(64, true)
         );
 
         assert!(!table_def.get("target").unwrap().is_key());
-        assert!(table_def.get("target").unwrap().is_not_null());
+        assert!(!table_def.get("target").unwrap().is_not_null());
         assert!(table_def.get("target").unwrap().is_reference());
         assert!(!table_def.get("target").unwrap().is_unique());
         assert!(!table_def.get("target").unwrap().has_max_length());
@@ -192,12 +196,8 @@ mod tests {
         assert!(type_id.is_some());
 
         // If the relation is behind an option it is implicitly marked for 'lazy loading'.
-        // Hence the bool in the type must be false.
-        let player_registration = type_id.unwrap();
-        assert_eq!(
-            table_def.get("target").unwrap().sql_type,
-            SqlType::One2One(player_registration.type_id(), false)
-        );
+        // Which also means it can be null
+        assert!(!table_def.get("target").unwrap().is_eager());
     }
 
     #[test]
@@ -217,6 +217,7 @@ mod tests {
         assert!(erm_types_registry
             .get_table_definition("GameMode")
             .is_some());
+
         assert!(erm_types_registry
             .get_table_definition("GameModes")
             .is_some());
@@ -232,16 +233,18 @@ mod tests {
         assert!(!table_def.get("id").unwrap().is_reference());
         assert!(!table_def.get("id").unwrap().is_unique());
         assert!(!table_def.get("id").unwrap().has_max_length());
+        assert!(!table_def.get("id").unwrap().is_eager());
         assert_eq!(
             table_def.get("id").unwrap().sql_type,
             SqlType::Integer(64, true)
         );
 
         assert!(!table_def.get("spawn_points").unwrap().is_key());
-        assert!(!table_def.get("spawn_points").unwrap().is_not_null());
+        assert!(table_def.get("spawn_points").unwrap().is_not_null());
         assert!(table_def.get("spawn_points").unwrap().is_reference());
         assert!(!table_def.get("spawn_points").unwrap().is_unique());
-        assert!(!table_def.get("spawn_points").unwrap().has_max_length());assert_eq!(
+        assert!(!table_def.get("spawn_points").unwrap().has_max_length());
+        assert_eq!(
             table_def.get("id").unwrap().sql_type,
             SqlType::Integer(64, true)
         );
@@ -258,13 +261,10 @@ mod tests {
         assert!(type_id.is_some());
 
         // The relation is not behind an Option, this means the relation is implicitly marked for
-        // eager loading. Hence the bool in the type must be true.
-        let spawn_point_registration = type_id.unwrap();
+        // eager loading.
         assert!(table_def.get("spawn_points").is_some());
-        assert_eq!(
-            table_def.get("spawn_points").unwrap().sql_type,
-            SqlType::Many2Many(spawn_point_registration.type_id(), true)
-        );
+        assert!(table_def.get("spawn_points").unwrap().is_eager());
+
     }
 
     #[test]

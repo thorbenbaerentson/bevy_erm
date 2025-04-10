@@ -98,8 +98,16 @@ impl ColumnDefinition {
             SqlType::DateTime(b) => b,
             SqlType::Blob(b) => b,
             SqlType::Boolean(b) => b,
-            SqlType::One2One(_, b) => !b,
-            SqlType::Many2Many(_, b) => !b,
+            SqlType::One2One(_, b) => b,        // True here means eager loading, which also means not null.
+            SqlType::Many2Many(_, b) => b,      // True here means eager loading, which also means not null.
+        }
+    }
+
+    pub fn is_eager(&self) -> bool {
+        match self.sql_type {
+            SqlType::One2One(_, b) => { b },
+            SqlType::Many2Many(_, b) => { b },
+            _ => { false }
         }
     }
 
